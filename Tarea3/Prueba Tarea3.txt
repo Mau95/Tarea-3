@@ -1,0 +1,163 @@
+#### Universidad de Costa Rica
+### IE0405: Tarea 3: Variables Aleatorias Múltiples
+### Mauricio Brenes Cerdas, B41105
+
+### Inicio del código
+
+### Paquetes requeridos para la realización de la tarea
+import decimal
+import csv
+import pandas as pd
+import numpy as np
+from numpy import genfromtxt
+from matplotlib import pyplot as plt
+import seaborn as sns
+from scipy import stats
+from scipy.stats import norm
+from numpy import arange
+from scipy.stats import kurtosis
+from scipy.stats import skew
+from scipy.optimize import curve_fit
+from matplotlib import pyplot 
+from pylab import *
+from mpl_toolkits.mplot3d.axes3d import Axes3D
+plt.style.use("fivethirtyeight")
+########################################################################
+
+########################### PARTE 1 ####################################
+
+### Con este comando se importan las variables aleatorias datos.csv.
+datos = np.genfromtxt("xy.csv",dtype=float, delimiter = ',',skip_header=1,usecols=range(1,22))
+#print(datos)
+
+### Creamos el arreglo de matriz para datos
+matriz = np.array([datos])
+#print(matriz)
+
+### Sumamos los valores de columnas y filas
+ColumnaY = np.sum(matriz, axis=1)
+#print(ColumnaY)
+FilasX = np.sum(matriz, axis=2)
+#print(FilasX)
+
+### Creamos los vectores de filas y columnas
+EjeX = np.linspace(5, 15, num=11)
+EjeY = np.linspace(5, 25, num=21)
+#print(EjeX)
+#print(EjeY)
+### Reescribimos los vectores de sumas de "X" y "Y"
+FilaX = [0.06714,0.07172,0.08327,0.0923,0.12226,0.14149,0.12172,0.09834,0.07686,0.05977,0.06519]
+FilaY = [0.03698,0.03364,0.03105,0.03481,0.03546,0.0395,0.04947,0.04839,0.06363,0.08419,0.07856,
+         0.08193,0.06626,0.05344,0.0444,0.03981,0.03691,0.0343,0.04137,0.02939,0.03657]
+
+### Curva de mejor ajuste, obtenemos los parámetros de la Gaussiana
+def gaussiana(x,mu,sigma):
+    return 1/(np.sqrt(2*np.pi*sigma**2))*np.exp(-(x-mu)**2/(2*sigma**2))
+#EjeX = np.linspace(5, 15, num=11)
+paramx, _ = curve_fit(gaussiana,EjeX,FilaX)
+print('Los parámetros mu y sigma de FDM "X" son, respectivamente:',paramx)
+paramy, _ = curve_fit(gaussiana,EjeY,FilaY)
+print('Los parámetros mu y sigma de FDM "Y" son, respectivamente:',paramy)
+
+
+############################# PARTE 2 ##############################
+## La función de densidad conjunta se obtiene al evaluar la expresión de Gauss con los parámetros
+## obtenidos en la Parte 1, y multiplicar dichas expresiones:
+
+# F(x)*F(y) =  0.03569*np.exp(-((((X-9.90484381)**2)/6.60)+(((Y-15.0794609)**2)/12.05)))
+
+
+################# PARTE 3 ##################
+### Se importan los datos xyp.csv
+datos = pd.read_csv('xyp.csv')
+#print(datos)
+
+### Se separan los datos en columnas
+A = datos.x
+B = datos.y
+C = datos.p
+#print(A)
+#print(B)
+#print(C)
+
+### Se calcula la correlación que es la multiplicación de la posición x, y y su probabilidad
+Multi = A*B*C
+#print('La correlación por entrada es:',Multi)
+#len(Multi)
+
+### Se suma cada correlación y se obtiene la correlación total
+Suma = sum(Multi)
+print('La correlación de"x" y "y" es:',Suma)
+
+### Al ver el resultado, se dice que las variables "X" y "Y", no están correlacionadas,
+### igualmente desde el momneto que se asumió independencia, ya dejó de existir la correlación.
+
+
+### Cálculo de Covarianza
+MediaX = 9.90484381
+MediaY = 15.0794609
+A1 = (datos.x-MediaX)
+B1 = (datos.y-MediaY)
+#print(A1)
+#print(B1)
+Cov = A1*B1*C
+#print(Cov)
+SumCov = sum(Cov)
+print('La covarianza de "X" y "Y" es de:',SumCov)
+
+### Si las variables son independientes o no correlacionadas,
+### la covarianza es cero, se puede notar que el resultado es
+### cercano a cero, por lo tanto se corrobora.
+
+### Cálculo del coeficiente de Correlación Pearson
+SigmaX = 3.29944286
+SigmaY = 6.02693775
+Des_Est_X = np.sqrt(SigmaX)
+#print('La desviación estándar de "X" es:',Des_Est_X)
+Des_Est_Y = np.sqrt(SigmaY)
+#print('La desviación estándar de "Y" es:',Des_Est_Y)
+Coe_Pear = SumCov / Des_Est_X*Des_Est_Y
+print('El coeficiente de Pearson es:',Coe_Pear)
+
+### Denominado como el momneto de segundo orden normalizado "rho",
+### con un valor -1<rho<1, por lo tanto el valor obtenido cumple.
+
+
+############### PARTE 4 #################
+
+### Creamos los vectores de filas y columnas
+EjeX = np.linspace(5, 15, num=11)
+EjeY = np.linspace(5, 25, num=21)
+#print(EjeX)
+#print(EjeY)
+### Reescribimos los vectores de sumas del eje "X" y "Y"
+FilaX = [0.06714,0.07172,0.08327,0.0923,0.12226,0.14149,0.12172,0.09834,0.07686,0.05977,0.06519]
+FilaY = [0.03698,0.03364,0.03105,0.03481,0.03546,0.0395,0.04947,0.04839,0.06363,0.08419,0.07856,
+         0.08193,0.06626,0.05344,0.0444,0.03981,0.03691,0.0343,0.04137,0.02939,0.03657]
+### Graficamos la función de densidad marginal de "X", 2D.
+plt.plot(EjeX, FilaX)
+plt.title('Función de densidad marginal "X"')
+### Graficamos la función de densidad marginal de "Y", 2D.
+#plt.plot(EjeY,FilaY)
+#plt.title('Función de densidad marginal "Y"')
+
+######## Graficamos la función de densidad conjunta
+EjeX = np.linspace(5, 15, num=100)
+EjeY = np.linspace(5, 25, num=100)
+X = EjeX
+Y = EjeY
+X, Y = np.meshgrid(X, Y)
+a = 0.03569
+mu1 = 9.90484381
+mu2 = 15.0794609
+Z = a*np.exp(-((((X-mu1)**2)/6.60)+(((Y-mu2)**2)/12.05)))
+fig = plt.figure(figsize = (7,7))
+ax = fig.add_subplot(1,1,1, projection = '3d')
+ax.plot_wireframe(X, Y, Z, rstride = 2, cstride = 2, cmap = 'Blues')
+ax.set_xlabel('Eje X')
+ax.set_ylabel('Eje Y')
+ax.set_zlabel('F(X,Y)')
+ax.set_title('Función de densidad conjunta')
+show()
+
+
